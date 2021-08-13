@@ -8,6 +8,8 @@ import (
 	"github.com/ouhaohan8023/patientRegistration/lib"
 	"github.com/ouhaohan8023/patientRegistration/model"
 	"github.com/spf13/viper"
+	"math/rand"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -21,7 +23,7 @@ func Submit(ctx iris.Context) {
 	val, err := client.Get(cct, ip).Result()
 	if err != nil {
 		fmt.Println(ip + " not exist")
-		err = client.Set(cct, ip, 1, 3600 * time.Second).Err()
+		err = client.Set(cct, ip, 1, 3600*time.Second).Err()
 		if err != nil {
 			panic(err)
 		}
@@ -34,7 +36,7 @@ func Submit(ctx iris.Context) {
 		ctx.JSON(lib.CommonResponse(500, "submit too quickly", nil))
 	} else {
 		add := nums + 1
-		err = client.Set(cct, ip, add, 60 * time.Second).Err()
+		err = client.Set(cct, ip, add, 60*time.Second).Err()
 		if err != nil {
 			panic(err)
 		}
@@ -80,6 +82,34 @@ func Submit(ctx iris.Context) {
 			})
 		}
 
-
 	}
+}
+
+func Upload(ctx iris.Context) {
+	f, fh, err := ctx.FormFile("file")
+	if err != nil {
+		ctx.StatusCode(iris.StatusInternalServerError)
+		ctx.HTML("1Error while uploading: <b>" + err.Error() + "</b>")
+		return
+	}
+	defer f.Close()
+
+	filename := GetRand(10) + "_" + fh.Filename
+	_, err = ctx.SaveFormFile(fh, filepath.Join("./uploads", filename))
+	if err != nil {
+		ctx.StatusCode(iris.StatusInternalServerError)
+		ctx.HTML("2Error while uploading: <b>" + err.Error() + "</b>")
+		return
+	}
+	ctx.JSON(lib.CommonResponse(200, "upload success", nil))
+}
+
+func GetRand(n int) string {
+	rand.Seed(time.Now().UnixNano())
+	letterRunes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
 }

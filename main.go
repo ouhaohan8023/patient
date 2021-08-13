@@ -29,6 +29,8 @@ var (
 	sigKey = []byte("signature_hmac_secret_shared_key")
 )
 
+const maxSize = 8 * iris.MB
+
 func main() {
 	connect = database.ConnectMysql()
 	database.Migrate(connect)
@@ -40,12 +42,13 @@ func main() {
 	verifyMiddleware := verifier.Verify(func() interface{} {
 		return new(model.Admin)
 	})
-	protectedAPI := app.Party("/lists")
+	protectedAPI := app.Party("/")
 	protectedAPI.Use(verifyMiddleware)
-	protectedAPI.Get("/", services.List)
+	protectedAPI.Get("/lists", services.List)
+	protectedAPI.Post("/upload", services.Upload)
 
 	app.Post("/submit", services.Submit)
 	app.Post("/login", services.Login)
 
-	app.Listen(":8080")
+	app.Listen(":8080", iris.WithPostMaxMemory(maxSize))
 }
