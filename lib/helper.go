@@ -41,10 +41,10 @@ func ValidateUsPhoneNumber(phone string) bool {
 	//return re.MatchString(phone)
 }
 
-func CommonResponse(code int, msg string, content iris.Map) iris.Map  {
+func CommonResponse(code int, msg string, content iris.Map) iris.Map {
 	ctx := iris.Map{
 		"status":  code,
-		"message": msg,
+		"msg":     msg,
 		"content": content,
 	}
 	return ctx

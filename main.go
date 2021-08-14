@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/iris-contrib/middleware/cors"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/kataras/iris/v12"
@@ -37,18 +38,31 @@ func main() {
 
 	app := iris.New()
 
+	// Backed
 	verifier := jwt.NewVerifier(jwt.HS256, sigKey)
 	verifier.WithDefaultBlocklist()
 	verifyMiddleware := verifier.Verify(func() interface{} {
 		return new(model.Admin)
 	})
-	protectedAPI := app.Party("/")
+	protectedAPI := app.Party("/lists")
 	protectedAPI.Use(verifyMiddleware)
-	protectedAPI.Get("/lists", services.List)
-	protectedAPI.Post("/upload", services.Upload)
+	protectedAPI.Post("/{id}", services.Update)
 
-	app.Post("/submit", services.Submit)
+	protectedAPI.Get("/", services.List)
+
+	app.Post("/upload", services.Upload)
+	//app.Post("/lists/{id}", services.Update)
 	app.Post("/login", services.Login)
 
+	// Front
+	app.Post("/submit", services.Submit)
+
+	crs := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+	})
+	app.UseRouter(crs)
+
+	app.HandleDir("/uploads", iris.Dir("./uploads"))
 	app.Listen(":8080", iris.WithPostMaxMemory(maxSize))
 }

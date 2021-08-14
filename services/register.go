@@ -14,6 +14,17 @@ import (
 	"time"
 )
 
+type Input struct {
+	Name        string `json:"username"`
+	Address     string `json:"address"`
+	Appointment string `json:"appointment"`
+	Birthday    string `json:"birthday"`
+	Email       string `json:"email"`
+	Img         string `json:"img"`
+	Phone       string `json:"mobile"`
+	Photo       string `json:"photo"`
+}
+
 func Submit(ctx iris.Context) {
 	r := ctx.Request()
 	ip, _ := lib.GetIP(r)
@@ -33,7 +44,7 @@ func Submit(ctx iris.Context) {
 	requestLimitStr := viper.GetString(`requestLimit`)
 	requestLimit, err := strconv.Atoi(requestLimitStr)
 	if nums >= requestLimit {
-		ctx.JSON(lib.CommonResponse(500, "submit too quickly", nil))
+		ctx.JSON(lib.CommonResponse(500, "Submit Too Quickly", nil))
 	} else {
 		add := nums + 1
 		err = client.Set(cct, ip, add, 60*time.Second).Err()
@@ -41,47 +52,46 @@ func Submit(ctx iris.Context) {
 			panic(err)
 		}
 
-		name := ctx.PostValue("name")
-		birthday := ctx.PostValue("birthday")
-		phone := ctx.PostValue("phone")
-		email := ctx.PostValue("email")
-		photo := ctx.PostValue("photo")
-		appointment := ctx.PostValue("appointment")
-		currentTime := time.Now()
-		M := model.Users{
-			Name:        name,
-			Birthday:    birthday,
-			Phone:       phone,
-			Email:       email,
-			Photo:       photo,
-			Appointment: appointment,
-			CreatedAt:   currentTime,
-			UpdatedAt:   currentTime,
-		}
-		validate := validator.New()
-		err := validate.Struct(M)
-		if err != nil {
-			for _, err := range err.(validator.ValidationErrors) {
-				ctx.JSON(lib.CommonResponse(500, "submit error", iris.Map{
-					"key": err.Field(),
-					"msg": err.Tag(),
-				}))
-			}
-			return
-		}
-		isUsPhone := lib.ValidateUsPhoneNumber(phone)
-		if !isUsPhone {
-			ctx.JSON(lib.CommonResponse(500, "not validate phone", nil))
-		} else {
-			connect := database.ConnectMysql()
-			create := connect.Create(&M)
-			ctx.JSON(iris.Map{
-				"status":  200,
-				"message": "submit success",
-				"content": create.Value,
-			})
-		}
+		c := &Input{}
 
+		if err := ctx.ReadJSON(c); err != nil {
+			panic(err.Error())
+		} else {
+			now := time.Now()
+			M := model.Users{
+				Name:        c.Name,
+				Birthday:    c.Birthday,
+				Phone:       c.Phone,
+				Email:       c.Email,
+				Photo:       c.Photo,
+				Appointment: c.Appointment,
+				CreatedAt:   now,
+				UpdatedAt:   now,
+			}
+			validate := validator.New()
+			err := validate.Struct(M)
+			if err != nil {
+				for _, err := range err.(validator.ValidationErrors) {
+					ctx.JSON(lib.CommonResponse(500, "submit error", iris.Map{
+						"msg": err.Field() + " is " + err.Tag(),
+					}))
+					break
+				}
+				return
+			}
+			isUsPhone := lib.ValidateUsPhoneNumber(c.Phone)
+			if !isUsPhone {
+				ctx.JSON(lib.CommonResponse(500, "not validate phone", nil))
+			} else {
+				connect := database.ConnectMysql()
+				create := connect.Create(&M)
+				ctx.JSON(iris.Map{
+					"status":  200,
+					"message": "submit success",
+					"content": create.Value,
+				})
+			}
+		}
 	}
 }
 
@@ -101,7 +111,10 @@ func Upload(ctx iris.Context) {
 		ctx.HTML("2Error while uploading: <b>" + err.Error() + "</b>")
 		return
 	}
-	ctx.JSON(lib.CommonResponse(200, "upload success", nil))
+	rtx := iris.Map{
+		"url": "http://localhost:8080/uploads/" + filename,
+	}
+	ctx.JSON(lib.CommonResponse(200, "upload success", rtx))
 }
 
 func GetRand(n int) string {

@@ -11,23 +11,41 @@ import (
 func init() {
 
 }
+
 var (
 	sigKey = []byte("signature_hmac_secret_shared_key")
 )
 
+type LoginInput struct {
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+	IsRemember string `json:"is_remember"`
+}
+
 func Login(ctx iris.Context) {
-	username := ctx.PostValue("username")
-	password := ctx.PostValue("password")
-	// todo verify by db
-	if username == "admin" && password == "admin" {
-		signer := jwt.NewSigner(jwt.HS256, sigKey, 60*time.Minute)
-		token := generateToken(signer, ctx)
-		context := iris.Map{
-			"token": token,
-		}
-		ctx.JSON(lib.CommonResponse(200, "Login Success", context))
+	c := &LoginInput{}
+
+	if err := ctx.ReadJSON(c); err != nil {
+		panic(err.Error())
 	} else {
-		ctx.JSON(lib.CommonResponse(500, "Username / Password ERROR", nil))
+		username := c.Username
+		password := c.Password
+		// todo verify by db
+		if username == "admin" && password == "admin" {
+			signer := jwt.NewSigner(jwt.HS256, sigKey, 14400*time.Minute)
+			token := generateToken(signer, ctx)
+			context := iris.Map{
+				"token": token,
+				"uuid":  1,
+				"info": iris.Map{
+					"name":   "Admin",
+					"avatar": "http://localhost:8080/uploads/avatar.jpeg",
+				},
+			}
+			ctx.JSON(lib.CommonResponse(200, "Login Success", context))
+		} else {
+			ctx.JSON(lib.CommonResponse(500, "Username / Password ERROR", nil))
+		}
 	}
 }
 
