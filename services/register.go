@@ -65,6 +65,7 @@ func Submit(ctx iris.Context) {
 				Email:       c.Email,
 				Photo:       c.Photo,
 				Appointment: c.Appointment,
+				Address:     c.Address,
 				CreatedAt:   now,
 				UpdatedAt:   now,
 			}
@@ -105,14 +106,18 @@ func Upload(ctx iris.Context) {
 	defer f.Close()
 
 	filename := GetRand(10) + "_" + fh.Filename
-	_, err = ctx.SaveFormFile(fh, filepath.Join("./uploads", filename))
+	environment := viper.GetString(`environment`)
+
+	uploadPath := viper.GetString(environment + `.uploadPath`)
+	_, err = ctx.SaveFormFile(fh, filepath.Join(uploadPath, filename))
 	if err != nil {
 		ctx.StatusCode(iris.StatusInternalServerError)
 		ctx.HTML("2Error while uploading: <b>" + err.Error() + "</b>")
 		return
 	}
+
 	rtx := iris.Map{
-		"url": "http://localhost:8080/uploads/" + filename,
+		"url": viper.GetString(environment+`.baseUrl`) + filename,
 	}
 	ctx.JSON(lib.CommonResponse(200, "upload success", rtx))
 }

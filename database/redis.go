@@ -6,7 +6,7 @@ import (
 )
 
 func ConnectRedis() *redis.Client {
-	environment := "dev"
+	environment := viper.GetString(`environment`)
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     viper.GetString(environment + `.redis.host`),
 		Password: "", // no password set

@@ -5,6 +5,7 @@ import (
 	"github.com/kataras/iris/v12/middleware/jwt"
 	"github.com/ouhaohan8023/patientRegistration/lib"
 	"github.com/ouhaohan8023/patientRegistration/model"
+	"github.com/spf13/viper"
 	"time"
 )
 
@@ -34,12 +35,14 @@ func Login(ctx iris.Context) {
 		if username == "admin" && password == "admin" {
 			signer := jwt.NewSigner(jwt.HS256, sigKey, 14400*time.Minute)
 			token := generateToken(signer, ctx)
+			environment := viper.GetString(`environment`)
+
 			context := iris.Map{
 				"token": token,
 				"uuid":  1,
 				"info": iris.Map{
 					"name":   "Admin",
-					"avatar": "http://localhost:8080/uploads/avatar.jpeg",
+					"avatar": viper.GetString(environment+`.baseUrl`) + "avatar.jpeg",
 				},
 			}
 			ctx.JSON(lib.CommonResponse(200, "Login Success", context))

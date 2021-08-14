@@ -13,13 +13,21 @@ dev:
     host: 127.0.0.1:6379
     username: ""
     password: ""
+  baseUrl: "http://localhost:8080/uploads/"
+  uploadPath: "./uploads"
 prod:
   database:
-    host: 127.0.0.1
+    host: 192.168.10.10
     port: 3306
-    username: root
-    password: root
+    username: homestead
+    password: secret
     db: patient
     charset: utf8
+  redis:
+    host: 127.0.0.1:6379
+    username: ""
+    password: ""
+  baseUrl: "https://done.ohh.ink/uploads/"
+  uploadPath: "/home/wwwroot/done.ohh.ink/uploads"
 log:
   http: true

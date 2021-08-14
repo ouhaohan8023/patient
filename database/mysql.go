@@ -8,7 +8,7 @@ import (
 )
 
 func ConnectMysql() *gorm.DB {
-	environment := "dev"
+	environment := viper.GetString(`environment`)
 	host := viper.GetString(environment + `.database.host`)
 	database := viper.GetString(environment + ".database.db")
 	charset := viper.GetString(environment + ".database.charset")

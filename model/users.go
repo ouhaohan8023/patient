@@ -11,6 +11,7 @@ type Users struct {
 	Email       string `validate:"required,email"`
 	Photo       string `validate:"required"`
 	Appointment string `validate:"required"`
+	Address     string `validate:"required"`
 	Status      int    `gorm:"default:0"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
