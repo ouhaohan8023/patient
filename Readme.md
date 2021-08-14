@@ -1,6 +1,6 @@
 ## Patient Registration Problem
 
-### Live Demo (HK Server 1M Bandwidth , Slow Slow Slow)
+### Live Demo
 1. [Click To Register Page](https://done.ohh.ink/register) 
 2. [Click To Admin Login](https://done.ohh.ink/login) admin admin
 
