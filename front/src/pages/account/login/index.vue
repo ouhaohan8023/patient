@@ -81,25 +81,19 @@
              * 表单校验已有 iView Pro 自动完成，如有需要修改，请阅读 iView Pro 文档
              */
             handleSubmit (name) {
+                let _that = this
                 this.$refs[name].validate((valid) => {
                     if (valid) {
                         this.login(this.formItem)
-                            .then(() => {
-                                // 重定向对象不存在则返回顶层路径
-                                this.$router.replace(this.$route.query.redirect || '/');
+                            .then((res) => {
+                                console.log(res, 99)
+                                if (res.status === 200) {
+                                    // 重定向对象不存在则返回顶层路径
+                                    this.$router.replace(this.$route.query.redirect || '/');
+                                } else {
+                                    _that.$Message.error(res.msg);
+                                }
                         });
-                        // AccountLogin(this.formItem).then(function (res) {
-                        //   if (res.status === 500) {
-                        //     if (res.content) {
-                        //       _that.$Message.error(res.content.msg);
-                        //     } else {
-                        //       _that.$Message.error(res.msg);
-                        //     }
-                        //   } else {
-                        //     _that.$Message.success('Login Success!');
-                        //     _that.$router.replace({ name: 'dashboard-console' });
-                        //   }
-                        // })
                     } else {
                         this.$Message.error('Fail!');
                     }

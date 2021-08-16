@@ -172,6 +172,12 @@
                         show: true
                     },
                     {
+                        title: 'Address',
+                        key: 'Address',
+                        minWidth: 180,
+                        show: true
+                    },
+                    {
                         title: 'CreatedAt',
                         slot: 'CreatedAt',
                         minWidth: 140,
@@ -354,9 +360,13 @@
                 }
             },
             handleOpenCreate () {
-                this.updateIndex = -1;
-                this.createData.desc = '';
-                this.showCreate = true;
+                // this.updateIndex = -1;
+                // this.createData.desc = '';
+                // this.showCreate = true;
+                this.$Modal.info({
+                    title: 'In Developing',
+                    content: 'Create method is in developing'
+                });
             },
             // 新增数据
             handleCreate () {

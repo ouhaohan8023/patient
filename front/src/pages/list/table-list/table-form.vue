@@ -40,8 +40,9 @@
         data () {
             return {
                 grid: {
-                    xl: 6,
-                    lg: 6,
+                    xxl: 6,
+                    xl: 12,
+                    lg: 12,
                     md: 12,
                     sm: 24,
                     xs: 24
